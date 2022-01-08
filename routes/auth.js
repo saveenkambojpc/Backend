@@ -1,8 +1,15 @@
 const express = require("express");
 const User = require("../Models/User");
+
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
 const { body, validationResult } = require("express-validator");
 
 const router = express.Router();
+
+// Json Web Tokken
+const JWT_SECRET = "harryisagoodboy";
 
 // We want to console req.body so we use a middleware in index.js
 
@@ -29,19 +36,30 @@ router.post(
         .json({ error: "Sorry : email with same user is already exist !" });
     }
 
+    // Creating a passowrd HASH
+    const salt = await bcrypt.genSalt(10);
+    const securedPassword = await bcrypt.hash(req.body.password, salt);
+
     try {
       user = await User.create({
         name: req.body.name,
         email: req.body.email,
-        password: req.body.email,
+        password: securedPassword,
       });
 
-      res.json(user);
+      // document retrival on id is very fast
+      const data = {
+        id: user.id,
+      };
+
+      const authToken = jwt.sign(data, JWT_SECRET);
+
+      // Sending response to client
+      res.json({ authToken });
     } catch (err) {
       console.log(err.message);
       res.status(500).send("Some Error Occured");
     }
-
   }
 );
 
