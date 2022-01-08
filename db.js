@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
+const DATABASE_NAME = "i-Notebook"
 
-const mongoURI = "mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false";
+const mongoURI = `mongodb://localhost:27017/${DATABASE_NAME}?readPreference=primary&appname=MongoDB%20Compass&ssl=false`;
 
 
 const connectToMongo = () =>{
