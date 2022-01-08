@@ -4,7 +4,7 @@ var express = require("express");
 connectToMongo();
 
 const app = express();
-const port = 3000;
+const port = 5000;
 
 // Middleware for using req json in console in auth.js
 app.use(express.json());

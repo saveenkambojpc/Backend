@@ -7,13 +7,12 @@ const router = express.Router();
 // We want to console req.body so we use a middleware in index.js
 
 // Create a User using : POST "/api/auth" - Doesn't require Auth
-
 router.post(
   "/",
   body("name", "Enter a valid Name").isLength({ min: 3 }),
   body("email", "Email is invalid").isEmail(),
   body("password").isLength({ min: 5 }),
-  (req, res) => {
+  async (req, res) => {
     //   Express validator boiler
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -21,19 +20,28 @@ router.post(
     }
 
     // Create a document in db
-    User.create({
-      name: req.body.name,
-      email: req.body.email,
-      password: req.body.email,
-    })
-      .then((user) => res.json(user))
-      .catch((err) => {
-        console.log("Please do not add duplicate", err.message);
-        res.json({
-          error: "Please enter a unique value",
-          message: err.message,
-        });
+    // Check whether the user with this email exist
+    let user = await User.findOne({ email: req.body.email });
+
+    if (user) {
+      return res
+        .status(400)
+        .json({ error: "Sorry : email with same user is already exist !" });
+    }
+
+    try {
+      user = await User.create({
+        name: req.body.name,
+        email: req.body.email,
+        password: req.body.email,
       });
+
+      res.json(user);
+    } catch (err) {
+      console.log(err.message);
+      res.status(500).send("Some Error Occured");
+    }
+
   }
 );
 
