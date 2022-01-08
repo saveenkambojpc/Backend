@@ -1,15 +1,23 @@
 const express = require("express")
+const User = require('../Models/User')
 
 const router = express.Router();
 
+// We want to console req.body so we use a middleware in index.js
 
-router.get('/', (req,res) =>{
-    obj = {
-        a : "this",
-        number: 43
-    }
+// Create a User using : POST "/api/auth" - Doesn't require Auth
 
-    res.json(obj)
+
+
+router.post('/', (req,res) =>{
+    
+    console.log(req.body)
+
+    const user = User(req.body)
+    user.save()
+
+    res.send(req.body)
+
 })
 
 
