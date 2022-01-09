@@ -1,5 +1,5 @@
 const express = require("express");
-const User = require("../Models/User");
+const User = require("../Models/User"); //Modal/Schema
 
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -27,20 +27,20 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    // Create a document in db
     // Check whether the user with this email exist
     let user = await User.findOne({ email: req.body.email });
-
+    
     if (user) {
       return res
-        .status(400)
-        .json({ error: "Sorry : email with same user is already exist !" });
+      .status(400)
+      .json({ error: "Sorry : email with same user is already exist !" });
     }
-
+    
     // Creating a passowrd HASH
     const salt = await bcrypt.genSalt(10);
     const securedPassword = await bcrypt.hash(req.body.password, salt);
-
+    
+    // Create a document in db
     try {
       user = await User.create({
         name: req.body.name,

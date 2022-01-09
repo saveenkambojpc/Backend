@@ -1,7 +1,12 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const noteSchema = new Schema({
+  user: {
+    type: String,
+    required: true,
+  },
+
   title: {
     type: String,
     required: true,
@@ -12,7 +17,7 @@ const noteSchema = new Schema({
   },
   tag: {
     type: String,
-    default: "General"
+    default: "General",
   },
   date: {
     type: Date,

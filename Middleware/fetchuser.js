@@ -9,7 +9,7 @@ const fetchuser = (req, res, next) => {
   try {
     if (token) {
       const data = jwt.verify(token, JWT_SECRET);
-      req.user = data;
+      req.user = data; // req.user obj include data(or JWT token)
       next();
     } else {
       return res.status(500).send({ error: "Please enter a valid token" });
