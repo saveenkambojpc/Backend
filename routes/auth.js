@@ -15,7 +15,7 @@ const JWT_SECRET = "harryisagoodboy";
 
 // Create a User using : POST "/api/auth" - Doesn't require Auth
 router.post(
-  "/",
+  "/createuser",
   body("name", "Enter a valid Name").isLength({ min: 3 }),
   body("email", "Email is invalid").isEmail(),
   body("password").isLength({ min: 5 }),
@@ -58,9 +58,52 @@ router.post(
       res.json({ authToken });
     } catch (err) {
       console.log(err.message);
-      res.status(500).send("Some Error Occured");
+      res.status(500).send("Internal Server Error Occured");
     }
   }
 );
 
+// Authenticate a user using authtoken - No login required
+router.post(
+  "/login",
+  body("email", "Email is invalid").isEmail(),
+  body("password", "Password cannot be blank").exists(),
+  async (req, res) => {
+    //   Express validator boiler - for checking email
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { email, password } = req.body;
+
+    try {
+      // Trying to find email in db
+      let user = await User.findOne({ email });
+      if (!user) {
+        return res
+          .status(400)
+          .json({ error: "Please try to login with correct credentials" });
+      }
+
+      // Password comparision
+      const passwordCompare = await bcrypt.compare(password, user.password);
+      if (!passwordCompare) {
+        return res
+          .status(400)
+          .json({ error: "Please try to login with correct credentials" });
+      } else {
+        const data = {
+          id: user.id,
+        };
+
+        const authToken = jwt.sign(data, JWT_SECRET);
+        res.json({ authToken });
+      }
+    } catch (err) {
+      console.log(err.message);
+      res.status(500).send("Internal Server Error Occured");
+    }
+  }
+);
 module.exports = router;
