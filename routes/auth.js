@@ -5,6 +5,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 const { body, validationResult } = require("express-validator");
+const fetchuser = require('../Middleware/fetchuser')
 
 const router = express.Router();
 
@@ -13,7 +14,7 @@ const JWT_SECRET = "harryisagoodboy";
 
 // We want to console req.body so we use a middleware in index.js
 
-// Create a User using : POST "/api/auth" - Doesn't require Auth
+// Route 1 : Create a User using : POST "/api/auth" - Doesn't require Auth
 router.post(
   "/createuser",
   body("name", "Enter a valid Name").isLength({ min: 3 }),
@@ -63,7 +64,7 @@ router.post(
   }
 );
 
-// Authenticate a user using authtoken - No login required
+// Route 2 : Authenticate a user using authtoken - No login required
 router.post(
   "/login",
   body("email", "Email is invalid").isEmail(),
@@ -106,4 +107,19 @@ router.post(
     }
   }
 );
+
+// Route 3: Get Logged in user detail(from authtoken) using POST "/api/auth/getuser". Login Required
+// fetchuser is a middlemware
+router.post("/getuser",fetchuser, async (req, res) => {
+  try {
+    // .select - select all the fields except password
+    userId = req.user.id;
+    const user = await User.findById(userId).select("-password");
+    res.send(user)
+  } catch (err) {
+    console.log(err.message);
+    res.status(500).send("Internal Server Error Occured");
+  }
+});
+
 module.exports = router;
