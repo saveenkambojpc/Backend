@@ -2,6 +2,7 @@ const express = require("express");
 const fetchuser = require("../Middleware/fetchuser");
 const Notes = require("../Models/Notes");
 const { body, validationResult } = require("express-validator");
+const { isValidObjectId } = require("mongoose");
 
 const router = express.Router();
 
@@ -43,6 +44,46 @@ router.post(
 router.get("/fetchallnotes", fetchuser, async (req, res) => {
   const notes = await Notes.find({ user: req.user.id });
   res.json({ notes });
+});
+
+// Route 3 : delete a note : Logged in Required
+router.get("/deletenote/:id", fetchuser, async (req, res) => {
+  try {
+    const note = await Notes.deleteOne({ _id: req.params.id });
+    console.log(note.deletedCount);
+
+    if (note.deletedCount) {
+      res.status(200).send("Successfully Deleted");
+    } else {
+      res.status(500).send("Note desn't exist");
+    }
+  } catch (err) {
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// Route 4 : Updata a note : Logged in Required
+router.post("/updatenote/:id", fetchuser, async (req, res) => {
+  try {
+    const note = await Notes.updateOne(
+      { _id: req.params.id },
+      {
+        $set: {
+          title: req.body.title,
+          description: req.body.description,
+          tag: req.body.tag,
+        },
+      }
+    );
+
+    if (note.modifiedCount) {
+      res.status(200).send("Successfully Updated");
+    } else {
+      res.status(500).send("Note desn't exist");
+    }
+  } catch (err) {
+    res.status(400).send("Internal Server Error");
+  }
 });
 
 module.exports = router;
